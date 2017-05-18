@@ -1,17 +1,15 @@
 module LazyQuery
 
-"""
-    test_function()
+using LazyContext
 
-Return 1
+import DataFrames
+import LazyCall
+import ChainRecursive
+import MacroTools
 
-```jldoctest
-julia> import LazyQuery
-
-julia> LazyQuery.test_function()
-2
-```
-"""
-test_function() = 1
+include("utilities.jl")
+include("standard_evaluation.jl")
+include("lazy_patterns.jl")
+include("query_verbs.jl")
 
 end
