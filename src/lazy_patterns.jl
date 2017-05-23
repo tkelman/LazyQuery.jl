@@ -36,15 +36,16 @@ end
 evaluate_to_numbers(afunction, w::LazyContext.WithContext, args) =
     evaluate_to_numbers(afunction, LazyContext.evaluate!(w), args)
 
-evaluate_keyword(table, with_context) = begin
-    MacroTools.@match with_context.expression begin
-        ( a_ = b_ ) => (
-            a,
-            with(table,
-                LazyContext.WithContext(b, with_context.environment) )
-        )
-        a_ => error("Expected an assignment or keyword")
+
+decompose_assignment(e) =
+    MacroTools.@match e begin
+        ( key_ = value_ ) => (key, value)
+        any_ => error("Expected an assignment or keyword")
     end
+
+evaluate_keyword(table, with_context) = begin
+    key, value = decompose_assignment(with_context.expression)
+    key, with(table, LazyContext.WithContext(value, with_context.environment))
 end
 
 evaluate_keywords(afunction, table, args) = begin
@@ -58,11 +59,8 @@ evaluate_keywords(afunction, w::LazyContext.WithContext, args) =
     evaluate_keywords(afunction, LazyContext.evaluate!(w), args)
 
 quote_keyword_to_pair(with_context) = begin
-    copy_context = copy(with_context)
-        MacroTools.@match copy_context.expression begin
-            ( a_ = b_ ) => (b => a)
-            a_ => error("Expected an assignment or keyword")
-        end
+    key, value = decompose_assignment(with_context.expression)
+    value => key
 end
 
 quote_keywords_to_dict(afunction, table, args) =
