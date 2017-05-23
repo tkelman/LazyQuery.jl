@@ -57,7 +57,7 @@ julia> LazyContext.@new_environment;
 
 julia> LazyContext.@use_in_environment LazyQuery;
 
-julia> :azyContext.@evaluate begin
+julia> LazyContext.@evaluate begin
            d = Dict(:a => 1, :b => 2)
            @make_from(d, c = a + b, d = b - a)
        end == Dict(:c => 3, :d => 1)
