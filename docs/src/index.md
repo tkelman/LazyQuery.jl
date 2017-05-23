@@ -39,6 +39,12 @@ julia>  ChainRecursive.@chain LazyContext.@evaluate begin
 │ 2   │ 2 │ 5 │ 4.5 │
 ```
 
+Note that the anonymous do block above is slow; a new environment is set up
+containing the contents of a subframe is set up each time it is called. In fact,
+given a bit more work, `@make_from` could be called directly on a
+`GroupedDataFrame`. At the moment, this package is in the proof-of-concept
+stage.
+
 ```@index
 ```
 
