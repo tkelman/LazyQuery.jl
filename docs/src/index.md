@@ -7,6 +7,7 @@ tabular data structures.
 
 ```jldoctest
 julia>  import LazyContext, ChainRecursive, LazyQuery, DataFrames;
+[...]
 
 julia>  LazyContext.@new_environment;
 
