@@ -3,3 +3,4 @@ DataFrames
 LazyCall
 ChainRecursive
 MacroTools
+LazyContext
