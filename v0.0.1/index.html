@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Home · LazyQuery.jl</title><link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/4.2.0/normalize.min.css" rel="stylesheet" type="text/css"/><link href="https://fonts.googleapis.com/css?family=Lato|Ubuntu+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.2.0/require.min.js" data-main="assets/documenter.js"></script><script src="siteinfo.js"></script><script src="../versions.js"></script><link href="assets/highlightjs/default.css" rel="stylesheet" type="text/css"/><link href="assets/documenter.css" rel="stylesheet" type="text/css"/></head><body><nav class="toc"><h1>LazyQuery.jl</h1><select id="version-selector" onChange="window.location.href=this.value" style="visibility: hidden"></select><form class="search" action="search.html"><input id="search-query" name="q" type="text" placeholder="Search docs"/></form><ul><li class="current"><a class="toctext" href="index.html">Home</a><ul class="internal"></ul></li></ul></nav><article id="docs"><header><nav><ul><li><a href="index.html">Home</a></li></ul><a class="edit-page" href="https://github.com/bramtayl/LazyQuery.jl/tree/e58692ea8e53e660ec67d18eb0f3d17feb780c1a/docs/src/index.md"><span class="fa"></span> Edit on GitHub</a></nav><hr/></header><h1><a class="nav-anchor" id="LazyQuery.jl-1" href="#LazyQuery.jl-1">LazyQuery.jl</a></h1><p>This package is currently a proof-of-concept for lazy-evaluation based table querying. It is built on <code>LazyContext.jl</code>. It only supports <code>DataFrames</code> at the moment, but there is no reason the package can&#39;t be extended to other tabular data structures.</p><pre><code class="language-julia-repl">julia&gt;  import LazyContext, ChainRecursive, LazyQuery, DataFrames;
+
+julia&gt;  LazyContext.@new_environment;
+
+julia&gt;  LazyContext.@use_in_environment DataFrames LazyQuery;
+
+julia&gt;  ChainRecursive.@chain LazyContext.@evaluate begin
+            DataFrame(
+                a = [1, 1, 2, 2, 3, 3],
+                be = [1, 3, 2, 4, 3, 5],
+                C = [5, 3, 4, 2, 3, 1] )
+            @rename it b = be c = C
+            @add_to(it,
+                d = b .+ c,
+                e = b .- a)
+            @choose_from it -c
+            @rows_where it a .&gt; 1
+            @groupby it e
+            map(it) do subframe
+                @make_from(subframe,
+                    f = sum(a),
+                    g = mean(b)
+                )
+            end
+            combine(it)
+        end
+2×3 DataFrames.DataFrame
+│ Row │ e │ f │ g   │
+├─────┼───┼───┼─────┤
+│ 1   │ 0 │ 5 │ 2.5 │
+│ 2   │ 2 │ 5 │ 4.5 │</code></pre><p>Note that the anonymous do block above is slow; a new environment is set up containing the contents of a subframe is set up each time it is called. In fact, given a bit more work, <code>@make_from</code> could be called directly on a <code>GroupedDataFrame</code>. At the moment, this package is in the proof-of-concept stage.</p><ul><li><a href="index.html#LazyQuery.add_to-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}"><code>LazyQuery.add_to</code></a></li><li><a href="index.html#LazyQuery.choose_from-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}"><code>LazyQuery.choose_from</code></a></li><li><a href="index.html#LazyQuery.make_from-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}"><code>LazyQuery.make_from</code></a></li><li><a href="index.html#LazyQuery.rows_where-Tuple{LazyContext.WithContext,Any}"><code>LazyQuery.rows_where</code></a></li><li><a href="index.html#LazyQuery.with-Tuple{LazyContext.WithContext,LazyContext.WithContext}"><code>LazyQuery.with</code></a></li></ul><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="LazyQuery.add_to-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}" href="#LazyQuery.add_to-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}"><code>LazyQuery.add_to</code></a> — <span class="docstring-category">Method</span>.</div><div><pre><code class="language-none">add_to(w::LazyContext.WithContext, args...)</code></pre><p>Add to <code>w</code>, evaluating <code>args</code> in context.</p><pre><code class="language-julia-repl">julia&gt; import LazyContext, LazyQuery
+
+julia&gt; LazyContext.@new_environment;
+
+julia&gt; LazyContext.@use_in_environment LazyQuery;
+
+julia&gt; LazyContext.@evaluate begin
+           d = Dict(:a =&gt; 1, :b =&gt; 2);
+           @add_to d c = a + b
+       end == Dict(:a =&gt; 1, :b =&gt; 2, :c =&gt; 3)
+true</code></pre></div><a class="source-link" target="_blank" href="https://github.com/bramtayl/LazyQuery.jl/tree/e58692ea8e53e660ec67d18eb0f3d17feb780c1a/src/query_verbs.jl#L25-L43">source</a><br/></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="LazyQuery.choose_from-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}" href="#LazyQuery.choose_from-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}"><code>LazyQuery.choose_from</code></a> — <span class="docstring-category">Method</span>.</div><div><pre><code class="language-none">choose_from(w::LazyContext.WithContext, args...)</code></pre><p>Evaluate <code>with_context</code> in an environment including <code>w</code>.</p><pre><code class="language-julia-repl">julia&gt; import LazyContext, LazyQuery, DataFrames
+
+julia&gt; LazyContext.@new_environment;
+
+julia&gt; LazyContext.@use_in_environment DataFrames LazyQuery;
+
+julia&gt; LazyContext.@evaluate begin
+           d = DataFrame(a = 1, b = 2, c = 3, d = 4)
+           (@choose_from d a c:d) == (@choose_from d -b)
+       end
+true</code></pre></div><a class="source-link" target="_blank" href="https://github.com/bramtayl/LazyQuery.jl/tree/e58692ea8e53e660ec67d18eb0f3d17feb780c1a/src/query_verbs.jl#L2-L20">source</a><br/></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="LazyQuery.make_from-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}" href="#LazyQuery.make_from-Tuple{LazyContext.WithContext,Vararg{Any,N} where N}"><code>LazyQuery.make_from</code></a> — <span class="docstring-category">Method</span>.</div><div><pre><code class="language-none">make_from(w::LazyContext.WithContext, args...)</code></pre><p>Make a new object from <code>w</code>, evaluating <code>args</code> in context.</p><pre><code class="language-julia-repl">julia&gt; import LazyContext, LazyQuery
+
+julia&gt; LazyContext.@new_environment;
+
+julia&gt; LazyContext.@use_in_environment LazyQuery;
+
+julia&gt; LazyContext.@evaluate begin
+           d = Dict(:a =&gt; 1, :b =&gt; 2)
+           @make_from(d, c = a + b, d = b - a)
+       end == Dict(:c =&gt; 3, :d =&gt; 1)
+true</code></pre></div><a class="source-link" target="_blank" href="https://github.com/bramtayl/LazyQuery.jl/tree/e58692ea8e53e660ec67d18eb0f3d17feb780c1a/src/query_verbs.jl#L48-L66">source</a><br/></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="LazyQuery.rows_where-Tuple{LazyContext.WithContext,Any}" href="#LazyQuery.rows_where-Tuple{LazyContext.WithContext,Any}"><code>LazyQuery.rows_where</code></a> — <span class="docstring-category">Method</span>.</div><div><pre><code class="language-none">rows_where(w::LazyContext.WithContext, rows)</code></pre><p>Get <code>rows</code> from <code>w</code>, evaluating <code>rows</code> in context.</p><pre><code class="language-julia-repl">julia&gt; import LazyContext, LazyQuery, DataFrames
+
+julia&gt; LazyContext.@new_environment;
+
+julia&gt; LazyContext.@use_in_environment LazyQuery DataFrames;
+
+julia&gt; LazyContext.@evaluate begin
+           d = DataFrame(a = [1, 2, 3], b = [3, 2, 1] )
+           @rows_where d a .== b
+       end
+1×2 DataFrames.DataFrame
+│ Row │ a │ b │
+├─────┼───┼───┤
+│ 1   │ 2 │ 2 │</code></pre></div><a class="source-link" target="_blank" href="https://github.com/bramtayl/LazyQuery.jl/tree/e58692ea8e53e660ec67d18eb0f3d17feb780c1a/src/query_verbs.jl#L71-L92">source</a><br/></section><section class="docstring"><div class="docstring-header"><a class="docstring-binding" id="LazyQuery.with-Tuple{LazyContext.WithContext,LazyContext.WithContext}" href="#LazyQuery.with-Tuple{LazyContext.WithContext,LazyContext.WithContext}"><code>LazyQuery.with</code></a> — <span class="docstring-category">Method</span>.</div><div><pre><code class="language-none">with(w::LazyContext.WithContext, with_context)</code></pre><p>Evaluate <code>with_context</code> in an environment including <code>w</code>.</p><pre><code class="language-julia-repl">julia&gt; import LazyContext, LazyQuery
+
+julia&gt; LazyContext.@new_environment;
+
+julia&gt; LazyContext.@use_in_environment LazyQuery;
+
+julia&gt; LazyContext.@evaluate begin
+           d = Dict(:a =&gt; 1, :b =&gt; 2)
+           @with d a + b
+       end
+3</code></pre><p>All other lazy functions in the package are based on <code>with</code>.</p></div><a class="source-link" target="_blank" href="https://github.com/bramtayl/LazyQuery.jl/tree/e58692ea8e53e660ec67d18eb0f3d17feb780c1a/src/lazy_patterns.jl#L7-L27">source</a><br/></section><footer><hr/></footer></article></body></html>
