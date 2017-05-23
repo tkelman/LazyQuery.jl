@@ -10,15 +10,13 @@ end
 Evaluate `with_context` in an environment including `w`.
 
 ```jldoctest
-julia> using LazyContext
+julia> import LazyContext, LazyQuery
 
-julia> import LazyQuery
+julia> LazyContext.@new_environment;
 
-julia> @new_environment;
+julia> LazyContext.@use_in_environment LazyQuery;
 
-julia> @use_in_environment LazyQuery;
-
-julia> @evaluate begin
+julia> LazyContext.@evaluate begin
            d = Dict(:a => 1, :b => 2)
            @with d a + b
        end
@@ -56,7 +54,7 @@ evaluate_keywords(afunction, table, args) = begin
     afunction(table; kwargs...)
 end
 
-evaluate_keywords(afunction, w::LazyContext.WithContext, args) = 
+evaluate_keywords(afunction, w::LazyContext.WithContext, args) =
     evaluate_keywords(afunction, LazyContext.evaluate!(w), args)
 
 quote_keyword_to_pair(with_context) = begin

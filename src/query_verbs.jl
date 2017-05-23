@@ -37,11 +37,8 @@ julia> LazyContext.@use_in_environment LazyQuery;
 julia> LazyContext.@evaluate begin
            d = Dict(:a => 1, :b => 2);
            @add_to d c = a + b
-       end
-Dict{Symbol,Int64} with 3 entries:
-  :a => 1
-  :b => 2
-  :c => 3
+       end == Dict(:a => 1, :b => 2, :c => 3)
+true
 ```
 """
 add_to(w::LazyContext.WithContext, args...) =
@@ -54,17 +51,17 @@ export make_from
 Make a new object from `w`, evaluating `args` in context.
 
 ```jldoctest
-julia> using LazyContext; @new_environment;
+julia> import LazyContext, LazyQuery
 
-julia> import LazyQuery; @use_in_environment LazyQuery;
+julia> LazyContext.@new_environment;
 
-julia> @evaluate begin
+julia> LazyContext.@use_in_environment LazyQuery;
+
+julia> :azyContext.@evaluate begin
            d = Dict(:a => 1, :b => 2)
            @make_from(d, c = a + b, d = b - a)
-       end
-Dict{Symbol,Int64} with 2 entries:
-  :d => 1
-  :c => 3
+       end == Dict(:c => 3, :d => 1)
+true
 ```
 """
 make_from(w::LazyContext.WithContext, args...) =
@@ -77,11 +74,13 @@ export rows_where
 Get `rows` from `w`, evaluating `rows` in context.
 
 ```jldoctest
-julia> using LazyContext; @new_environment;
+julia> import LazyContext, LazyQuery, DataFrames
 
-julia> import LazyQuery, DataFrames; @use_in_environment LazyQuery DataFrames;
+julia> LazyContext.@new_environment;
 
-julia> @evaluate begin
+julia> LazyContext.@use_in_environment LazyQuery DataFrames;
+
+julia> LazyContext.@evaluate begin
            d = DataFrame(a = [1, 2, 3], b = [3, 2, 1] )
            @rows_where d a .== b
        end
