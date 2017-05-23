@@ -1,10 +1,7 @@
 module LazyQuery
 
-using LazyContext
-
+import LazyContext
 import DataFrames
-import LazyCall
-import ChainRecursive
 import MacroTools
 
 include("utilities.jl")

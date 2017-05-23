@@ -1,6 +1,6 @@
 export choose_from
 """
-    choose_from(w::WithContext, args...)
+    choose_from(w::LazyContext.WithContext, args...)
 
 Evaluate `with_context` in an environment including `w`.
 
@@ -16,12 +16,12 @@ julia> @evaluate begin
 true
 ```
 """
-choose_from(w::WithContext, args...) =
+choose_from(w::LazyContext.WithContext, args...) =
     evaluate_to_numbers(choose_from, w, args)
 
 export add_to
 """
-    add_to(w::WithContext, args...)
+    add_to(w::LazyContext.WithContext, args...)
 
 Add to `w`, evaluating `args` in context.
 
@@ -35,17 +35,17 @@ julia> @evaluate begin
            @add_to d c = a + b
        end
 Dict{Symbol,Int64} with 3 entries:
-  :c => 3
   :a => 1
   :b => 2
+  :c => 3
 ```
 """
-add_to(w::WithContext, args...) =
+add_to(w::LazyContext.WithContext, args...) =
     evaluate_keywords(add_to, w, args)
 
 export make_from
 """
-    make_from(w::WithContext, args...)
+    make_from(w::LazyContext.WithContext, args...)
 
 Make a new object from `w`, evaluating `args` in context.
 
@@ -59,16 +59,16 @@ julia> @evaluate begin
            @make_from(d, c = a + b, d = b - a)
        end
 Dict{Symbol,Int64} with 2 entries:
-  :c => 3
   :d => 1
+  :c => 3
 ```
 """
-make_from(w::WithContext, args...) =
+make_from(w::LazyContext.WithContext, args...) =
     evaluate_keywords(make_from, w, args)
 
 export rows_where
 """
-    rows_where(w::WithContext, rows)
+    rows_where(w::LazyContext.WithContext, rows)
 
 Get `rows` from `w`, evaluating `rows` in context.
 
@@ -87,10 +87,10 @@ julia> @evaluate begin
 │ 1   │ 2 │ 2 │
 ```
 """
-rows_where(w::WithContext, rows) = begin
-    table = evaluate!(w)
+rows_where(w::LazyContext.WithContext, rows) = begin
+    table = LazyContext.evaluate!(w)
     rows_where(table, with(table, rows) )
 end
 
-DataFrames.groupby(w::WithContext, args...) =
+DataFrames.groupby(w::LazyContext.WithContext, args...) =
       evaluate_to_numbers(DataFrames.groupby, w, args)
