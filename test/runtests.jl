@@ -1,5 +1,7 @@
 using LazyQuery
 
+import LazyContext, ChainRecursive, LazyQuery, DataFrames;
+
 import Documenter
 Documenter.makedocs(
     modules = [LazyQuery],

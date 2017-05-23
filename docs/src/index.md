@@ -6,8 +6,6 @@ at the moment, but there is no reason the package can't be extended to other
 tabular data structures.
 
 ```jldoctest
-julia>  logging(DevNull, kind = :warn);
-
 julia>  import LazyContext, ChainRecursive, LazyQuery, DataFrames;
 
 julia>  LazyContext.@new_environment;
