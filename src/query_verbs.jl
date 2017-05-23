@@ -93,4 +93,7 @@ rows_where(w::LazyContext.WithContext, rows) = begin
 end
 
 DataFrames.groupby(w::LazyContext.WithContext, args...) =
-      evaluate_to_numbers(DataFrames.groupby, w, args)
+    evaluate_to_numbers(DataFrames.groupby, w, args)
+
+DataFrames.rename(w::LazyContext.WithContext, args...) =
+    quote_keywords_to_dict(DataFrames.rename, w, args)

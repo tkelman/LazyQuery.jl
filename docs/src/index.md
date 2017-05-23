@@ -6,15 +6,18 @@ at the moment, but there is no reason the package can't be extended to other
 tabular data structures.
 
 ```jldoctest
-julia>  using LazyContext, ChainRecursive; @new_environment;
+julia>  using LazyContext, ChainRecursive, LazyQuery, DataFrames;
 
-julia>  import LazyQuery, DataFrames; @use_in_environment DataFrames LazyQuery;
+julia>  LazyContext.@new_environment;
 
-julia>  @chain @evaluate begin
+julia>  LazyContext.@use_in_environment DataFrames LazyQuery;
+
+julia>  ChainRecursive.@chain LazyContext.@evaluate begin
             DataFrame(
                 a = [1, 1, 2, 2, 3, 3],
-                b = [1, 3, 2, 4, 3, 5],
-                c = [5, 3, 4, 2, 3, 1] )
+                be = [1, 3, 2, 4, 3, 5],
+                C = [5, 3, 4, 2, 3, 1] )
+            @rename it b = be c = C
             @add_to(it,
                 d = b .+ c,
                 e = b .- a)
