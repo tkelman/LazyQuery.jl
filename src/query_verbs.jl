@@ -5,11 +5,13 @@ export choose_from
 Evaluate `with_context` in an environment including `w`.
 
 ```jldoctest
-julia> using LazyContext; @new_environment;
+julia> import LazyContext, LazyQuery, DataFrames
 
-julia> import LazyQuery, DataFrames; @use_in_environment DataFrames LazyQuery;
+julia> LazyContext.@new_environment;
 
-julia> @evaluate begin
+julia> LazyContext.@use_in_environment DataFrames LazyQuery;
+
+julia> LazyContext.@evaluate begin
            d = DataFrame(a = 1, b = 2, c = 3, d = 4)
            (@choose_from d a c:d) == (@choose_from d -b)
        end
@@ -26,11 +28,13 @@ export add_to
 Add to `w`, evaluating `args` in context.
 
 ```jldoctest
-julia> using LazyContext; @new_environment;
+julia> import LazyContext, LazyQuery
 
-julia> import LazyQuery; @use_in_environment LazyQuery;
+julia> LazyContext.@new_environment;
 
-julia> @evaluate begin
+julia> LazyContext.@use_in_environment LazyQuery;
+
+julia> LazyContext.@evaluate begin
            d = Dict(:a => 1, :b => 2);
            @add_to d c = a + b
        end

@@ -56,6 +56,9 @@ evaluate_keywords(afunction, table, args) = begin
     afunction(table; kwargs...)
 end
 
+evaluate_keywords(afunction, w::LazyContext.WithContext, args) = 
+    evaluate_keywords(afunction, LazyContext.evaluate!(w), args)
+
 quote_keyword_to_pair(with_context) = begin
     copy_context = copy(with_context)
         MacroTools.@match copy_context.expression begin
